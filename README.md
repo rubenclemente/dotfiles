@@ -4,6 +4,8 @@
 
 I have taken [Bran van der Meer](https://github.com/branneman/dotfiles) dotfiles repository as a starting point.
 
+Interesting information here: https://dotfiles.github.io/tutorials/
+
 ## Installation
 
 - Without git installed:
