@@ -59,6 +59,19 @@ It controls prompt appearance, keyboard sound, shells to open, and individual pr
 To avoid login and non-login interactive shell setup difference, .bash_profile calls .bashrc.
 
 
+## Adding a new configuration file
+
+- Create the file inside 'dotfiles' folder
+
+$ touch ~/dotfiles/.vimrc
+
+- Create a symlink from '/home/user/.vimrc' to '/home/user/dotfiles/.vimrc'
+
+$ ln -sf ~/dotfiles/.vimrc ~/.vimrc
+
+- Push the new file to the repo
+
+
 ## Other configuration files
 
 - .vimrc
