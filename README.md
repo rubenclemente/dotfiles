@@ -75,6 +75,7 @@ $ ln -sf ~/dotfiles/.vimrc ~/.vimrc
 ## Other configuration files
 
 - .vimrc
+- .tmux.conf
 
 
 ## Journal
