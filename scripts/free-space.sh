@@ -55,4 +55,11 @@ snap list --all | awk '/disabled/{print $1, $3}' |
         snap remove "$snapname" --revision="$revision"
     done
 
+
+# (5) Clean the thumbnail cache
+
+du -sh ~/.cache/thumbnails
+rm -rf ~/.cache/thumbnails/*
+
+
 echo "End."
