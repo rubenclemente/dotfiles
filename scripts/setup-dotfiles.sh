@@ -28,13 +28,13 @@ function configure-git() {
   #echo "Enter Git fullname:"
   #read USER_NAME
   echo "Requesting root permissions to set git config at system level..."
-  sudo git config --system user.name $USER_NAME
+  sudo git config --system user.name "$USER_NAME"
   echo "Success."
 
   #echo "Enter Git email address:"
   #read USER_EMAIL
   echo "Requesting root permissions to set git config at system level..."
-  sudo git config --system user.email $USER_EMAIL
+  sudo git config --system user.email "$USER_EMAIL"
   echo "Success."
 
   git config --list
