@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
 
+GITHUB_USER="rubenclemente"
+
+
 function start() {
     nohup $1 &> /dev/null & disown;
 }
@@ -35,23 +38,23 @@ function tre() {
 #
 # GIT functions
 #
-function git_set_config() {
+function git-set-config() {
     git config --list
 
     echo "Enter Git fullname:"
-    read GIT_FULLNAME
+    read USER_NAME
     echo "Requesting root permissions to set git config at system level..."
-    sudo git config --system user.name $FULLNAME
+    sudo git config --system user.name $USER_NAME
 
     echo "Enter Git email address:"
-    read GIT_EMAIL
+    read USER_EMAIL
     echo "Requesting root permissions to set git config at system level..."
-    sudo git config --system user.email $GIT_EMAIL
+    sudo git config --system user.email $USER_EMAIL
 
     git config --list
 }
 
-function git_init_repo() {
+function git-init-repo() {
     if [[ -z "$1" ]]; then
         echo "Repository name is empty."
         return;
@@ -69,8 +72,8 @@ function git_init_repo() {
     echo "git commit -m \"First commit\""
     git commit -m "First commit"
 
-    echo "git remote add origin git@github.com:rubenclemente/$1.git"
-    git remote add origin git@github.com:rubenclemente/$1.git
+    echo "git remote add origin git@github.com:$GITHUB_USER/$1.git"
+    git remote add origin git@github.com:$GITHUB_USER/$1.git
 
     echo "git remote -v"
     git remote -v
