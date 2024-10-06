@@ -10,7 +10,7 @@ Interesting information here: https://dotfiles.github.io/tutorials/
 
 - Without git installed:
 ```bash
-curl https://raw.githubusercontent.com/rubenclemente/dotfiles/scripts/setup-dotfiles.sh | sh -s
+curl https://raw.githubusercontent.com/rubenclemente/dotfiles/main/scripts/setup-dotfiles.sh | sh -s
 ```
 
 - With git installed:
