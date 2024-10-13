@@ -73,3 +73,12 @@ fi
 if [ -f ~/.env ]; then
     . ~/.env
 fi
+
+
+# With a flatpak version of Libreoffice we don´t have a 'libreoffice'
+# command to use it in headless mode from the cli
+if [[ ! -f /usr/bin/libreoffice ]] && [[ ! -f /snap/bin/libreoffice ]]
+then
+    flatpak info org.libreoffice.LibreOffice > /dev/null && \
+         alias libreoffice='/usr/bin/flatpak run org.libreoffice.LibreOffice "$@"'
+fi

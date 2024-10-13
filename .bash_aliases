@@ -39,6 +39,4 @@ alias tree='tree -I ".git|node_modules"'
 
 alias path='echo -e ${PATH//:/\\n}'
 
-
-alias cddocker='cd /home/ruben/dev/ipur/ipur-master/ipur-deploy-tool/docker'
-alias cdproj='cd /media/ruben/CRUCIAL/devel/IdeaProjects'
+alias cdproj='cd /home/ruben/devel/projects/java'
