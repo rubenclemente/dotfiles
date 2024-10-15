@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
+# FUNCTIONS:
 
-GITHUB_USER="rubenclemente"
+# GITHUB_USER is declared in the '.env' file.
 
 
 function start() {
@@ -60,7 +61,9 @@ function git-init-repo() {
         return;
     fi;
 
-    echo "Repository name is [$1] - Press Enter to continue..."
+    echo "Github User is [$GITHUB_USER]"
+    echo "Repository name is [$1]"
+    echo "Press Enter to continue..."
     read
 
     echo "git init -b main"
@@ -82,4 +85,91 @@ function git-init-repo() {
     git push -u origin main
 
     echo "Success."
+}
+
+function test() {
+    echo $MY_GITHUB_USER
+}
+
+function fix-permissions() {
+    find - -type d -print0 | xargs -0 chmod 755
+    find . -type f -print0 | xargs -0 chmod 644
+    find . -type f -iname "*.sh" -exec chmod +x {} \;
+}
+
+set-permissions() {
+    # set-permissions "/path/to/your/folder" >> absolute path
+    # set-permissions "folder"               >> relative path
+
+    folder="$1"
+
+    # Check if the folder path is relative or absolute
+    if [[ "$folder" != /* ]]; then
+        # If it's a relative path, prepend the current working directory
+        folder="$(pwd)/$folder"
+    fi
+
+    # Check if the folder exists
+    if [ -d "$folder" ]; then
+        
+        cd "$folder" || exit
+
+        # Set permissions for directories (755)
+        find . -type d -print0 | xargs -0 chmod 755
+
+        # Set permissions for files (644)
+        find . -type f -print0 | xargs -0 chmod 644
+
+        # Make .sh files executable
+        find . -type f -iname "*.sh" -exec chmod +x {} \;
+
+        echo "Permissions have been set for the folder: $folder"
+    else
+        echo "Folder does not exist: $folder"
+        return 1
+    fi
+}
+
+create-desktop-entry() {
+    echo "Enter the name of the application (e.g., MyApp):"
+    read -r app_name
+
+    echo "Enter the full path to the executable (e.g., /usr/bin/myapp or /opt/myapp/bin/start.sh):"
+    read -r exec_path
+
+    echo "Enter the path for the application icon (e.g., /usr/share/icons/myapp.png or just 'myapp' if in icon theme):"
+    read -r icon_path
+
+    #echo "Does the application run in a terminal? (true/false)"
+    #read -r terminal_option
+    terminal_option=false
+
+    desktop_path="$HOME/Desktop"
+
+    # Convert app name to lowercase
+    lower_app_name=$(echo "$app_name" | tr '[:upper:]' '[:lower:]')
+
+    # Create the content for the .desktop file
+    desktop_entry_content="[Desktop Entry]
+Name=$app_name
+Comment=$app_name
+GenericName=$app_name
+Exec=$exec_path
+Terminal=$terminal_option
+X-MultipleArgs=false
+Type=Application
+Version=1.0
+Icon=$icon_path
+StartupNotify=true"
+
+    # Create the .desktop file on the Desktop
+    desktop_file="$desktop_path/${lower_app_name}.desktop"
+
+    # Write the content to the file
+    echo "$desktop_entry_content" > "$desktop_file"
+
+    # Make the .desktop file executable
+    chmod +x "$desktop_file"
+
+    echo "Desktop entry for $app_name created at $desktop_file"
 }

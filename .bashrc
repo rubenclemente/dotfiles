@@ -61,17 +61,17 @@ fi
 
 
 #
-# Custom functions definition.
-
-if [ -f ~/.functions ]; then
-    . ~/.functions
-fi
-
-#
 # Environment variables definition.
 
 if [ -f ~/.env ]; then
     . ~/.env
+fi
+
+#
+# Custom functions definition.
+
+if [ -f ~/.functions ]; then
+    . ~/.functions
 fi
 
 
