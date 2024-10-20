@@ -87,8 +87,12 @@ function git-init-repo() {
     echo "Success."
 }
 
-function test() {
-    echo $MY_GITHUB_USER
+function show-env() {
+    echo ">> GITHUB_USER = $GITHUB_USER"
+    echo ">> BASE_PATH   = $BASE_PATH"
+    echo ">> MVN_HOME    = $MVN_HOME"
+    echo ">> JAVA_HOME   = $JAVA_HOME"
+    echo ">> PATH        = $PATH"
 }
 
 function fix-permissions() {
@@ -97,7 +101,7 @@ function fix-permissions() {
     find . -type f -iname "*.sh" -exec chmod +x {} \;
 }
 
-set-permissions() {
+function set-permissions() {
     # set-permissions "/path/to/your/folder" >> absolute path
     # set-permissions "folder"               >> relative path
 
@@ -130,7 +134,7 @@ set-permissions() {
     fi
 }
 
-create-desktop-entry() {
+function create-desktop-entry() {
     echo "Enter the name of the application (e.g., MyApp):"
     read -r app_name
 
@@ -151,15 +155,16 @@ create-desktop-entry() {
 
     # Create the content for the .desktop file
     desktop_entry_content="[Desktop Entry]
+Encoding=UTF-8
 Name=$app_name
 Comment=$app_name
 GenericName=$app_name
 Exec=$exec_path
+Icon=$icon_path
 Terminal=$terminal_option
 X-MultipleArgs=false
 Type=Application
 Version=1.0
-Icon=$icon_path
 StartupNotify=true"
 
     # Create the .desktop file on the Desktop
@@ -172,4 +177,8 @@ StartupNotify=true"
     chmod +x "$desktop_file"
 
     echo "Desktop entry for $app_name created at $desktop_file"
+}
+
+list-functions() {
+    grep -E '^function\s+[a-zA-Z_-][a-zA-Z0-9_-]*\s*\(\)\s*{' ".functions" | awk '{print ">> " $2}'
 }
