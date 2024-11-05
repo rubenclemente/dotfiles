@@ -5,6 +5,10 @@
 # GITHUB_USER is declared in the '.env' file.
 
 
+function list-functions() {
+    grep -E '^function\s+[a-zA-Z_-][a-zA-Z0-9_-]*\s*\(\)\s*{' ".functions" | awk '{print ">> " $2}'
+}
+
 function start() {
     nohup $1 &> /dev/null & disown;
 }
@@ -95,15 +99,10 @@ function show-env() {
     echo ">> PATH        = $PATH"
 }
 
-function fix-permissions() {
-    find - -type d -print0 | xargs -0 chmod 755
-    find . -type f -print0 | xargs -0 chmod 644
-    find . -type f -iname "*.sh" -exec chmod +x {} \;
-}
-
 function set-permissions() {
-    # set-permissions "/path/to/your/folder" >> absolute path
-    # set-permissions "folder"               >> relative path
+    # set-permissions /path/to/your/folder  >> absolute path
+    # set-permissions folder                >> relative path
+    # set-permissions .                     >> current folder
 
     folder="$1"
 
@@ -116,7 +115,7 @@ function set-permissions() {
     # Check if the folder exists
     if [ -d "$folder" ]; then
         
-        cd "$folder" || exit
+        pushd "$folder" > /dev/null || exit
 
         # Set permissions for directories (755)
         find . -type d -print0 | xargs -0 chmod 755
@@ -126,6 +125,8 @@ function set-permissions() {
 
         # Make .sh files executable
         find . -type f -iname "*.sh" -exec chmod +x {} \;
+
+        popd > /dev/null || exit
 
         echo "Permissions have been set for the folder: $folder"
     else
@@ -179,6 +180,6 @@ StartupNotify=true"
     echo "Desktop entry for $app_name created at $desktop_file"
 }
 
-list-functions() {
-    grep -E '^function\s+[a-zA-Z_-][a-zA-Z0-9_-]*\s*\(\)\s*{' ".functions" | awk '{print ">> " $2}'
+function show-ports() {
+    sudo ss -tulpn | grep LISTEN
 }
