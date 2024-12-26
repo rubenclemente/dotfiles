@@ -1,12 +1,23 @@
 #!/usr/bin/env bash
 
+# Get the script's directory
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+#####################################################################
 # FUNCTIONS:
-
 # GITHUB_USER is declared in the '.env' file.
-
+#####################################################################
 
 function list-functions() {
-    grep -E '^function\s+[a-zA-Z_-][a-zA-Z0-9_-]*\s*\(\)\s*{' ".functions" | awk '{print ">> " $2}'
+    grep -E '^function\s+[a-zA-Z_-][a-zA-Z0-9_-]*\s*\(\)\s*{' "$SCRIPT_DIR/.functions" | awk '{print ">> " $2}'
+}
+
+function show-env() {
+    echo ">> GITHUB_USER = $GITHUB_USER"
+    echo ">> BASE_PATH   = $BASE_PATH"
+    echo ">> MVN_HOME    = $MVN_HOME"
+    echo ">> JAVA_HOME   = $JAVA_HOME"
+    echo ">> PATH        = $PATH"
 }
 
 function start() {
@@ -40,9 +51,10 @@ function tre() {
     tree -aC -I '.git|node_modules|bower_components' --dirsfirst "$@" | less -FRNX;
 }
 
-#
+#####################################################################
 # GIT functions
-#
+#####################################################################
+
 function git-set-config() {
     git config --list
 
@@ -88,16 +100,15 @@ function git-init-repo() {
     echo "git push -u origin main"
     git push -u origin main
 
-    echo "Success."
+    echo "Success initiating git repo '$1'."
 }
 
-function show-env() {
-    echo ">> GITHUB_USER = $GITHUB_USER"
-    echo ">> BASE_PATH   = $BASE_PATH"
-    echo ">> MVN_HOME    = $MVN_HOME"
-    echo ">> JAVA_HOME   = $JAVA_HOME"
-    echo ">> PATH        = $PATH"
+function gcom() {
+    git add .
+    git commit -m "$1"
 }
+
+#####################################################################
 
 function set-permissions() {
     # set-permissions /path/to/your/folder  >> absolute path
@@ -183,3 +194,4 @@ StartupNotify=true"
 function show-ports() {
     sudo ss -tulpn | grep LISTEN
 }
+
