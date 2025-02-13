@@ -31,6 +31,7 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 alias h="history | grep "
 alias p="ps aux | grep "
 
+alias cd..='cd ..'
 alias ..='cd ../..'
 alias ...='cd ../../..'
 alias ....='cd ../../../..'
@@ -61,5 +62,8 @@ alias pscpu10='ps auxf | sort -nr -k 3 | head -10'
 alias cpuinfo='lscpu'
 alias cpuinfo2='less /proc/cpuinfo'
  
+
+
+
 
 alias cdproj='cd /home/ruben/devel/projects/java'
