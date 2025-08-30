@@ -110,11 +110,31 @@ function gcom() {
 }
 
 #####################################################################
+# Permissions
+#####################################################################
+
+function show-permissions() {
+    _msg_yellow "  N   Description                      ls   binary"
+    _msg_yellow "  0   No permissions at all            ---  000"
+    _msg_yellow "  1   Only execute                     --x  001"
+    _msg_yellow "  2   Only write                       -w-  010"
+    _msg_yellow "  3   Write and execute                -wx  011"
+    _msg_yellow "  4   Only read                        r--  100"
+    _msg_yellow "  5   Read and execute                 r-x  101"
+    _msg_yellow "  6   Read and write                   rw-  110"
+    _msg_yellow "  7   Read, write, and execute         rwx  111"
+}
 
 function set-permissions() {
-    # set-permissions /path/to/your/folder  >> absolute path
-    # set-permissions folder                >> relative path
-    # set-permissions .                     >> current folder
+
+    if [ -z "$1" ]; then
+        _msg_yellow "Usage: set-permissions <folder>"
+        _msg_yellow "Example:"
+        _msg_yellow "  set-permissions /path/to/folder  # Absolute path"
+        _msg_yellow "  set-permissions folder           # Relative path"
+        _msg_yellow "  set-permissions .                # Current folder"
+        return 1
+    fi
 
     folder="$1"
 

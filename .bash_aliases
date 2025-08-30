@@ -63,7 +63,7 @@ alias cpuinfo='lscpu'
 alias cpuinfo2='less /proc/cpuinfo'
  
 
+## changing to projects
+alias cdp='cd /home/ruben/devel/projects/java'
+alias cdp1='cd /home/ruben/devel/projects/java/trade-tracker/backend'
 
-
-
-alias cdproj='cd /home/ruben/devel/projects/java'
