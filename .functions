@@ -52,6 +52,7 @@ function tre() {
     tree -aC -I '.git|node_modules|bower_components' --dirsfirst "$@" | less -FRNX;
 }
 
+
 #####################################################################
 # GIT functions
 #####################################################################
@@ -108,6 +109,7 @@ function gcom() {
     git add .
     git commit -m "$1"
 }
+
 
 #####################################################################
 # Permissions
@@ -167,6 +169,11 @@ function set-permissions() {
     fi
 }
 
+
+#####################################################################
+# Utilities
+#####################################################################
+
 function create-desktop-entry() {
     _msg_blue "Enter the name of the application (e.g., MyApp):"
     read -r app_name
@@ -216,9 +223,20 @@ function show-ports() {
     sudo ss -tulpn | grep LISTEN
 }
 
+# Simple function to convert Windows to Unix line endings
+2unix() {
+    for file in "$@"; do
+        if [[ -f "$file" && -w "$file" ]]; then
+            sed -i 's/\r$//' "$file" && echo "Fixed: $file"
+        else
+            echo "Skipping: $file (not found or not writable)" >&2
+        fi
+    done
+}
+
 
 #####################################################################
-# Util functions
+# Colors and messages
 #####################################################################
 
 # COLORS
@@ -263,3 +281,5 @@ function _msg_red() {
 function _msg_blue() {
     echo -e "${b}$1 ${n}" >&2
 }
+
+#####################################################################
