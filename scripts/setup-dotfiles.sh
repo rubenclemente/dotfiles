@@ -63,14 +63,15 @@ function main() {
   mkdir -p $DOTFILE_BACKUP_DIR
 
   # Ubuntu
-  files=".profile .bashrc .bash_prompt .bash_aliases .functions .env .curlrc .vimrc .tmux.conf"
+  files=".profile .bashrc .bash_prompt .bash_aliases .functions .env .curlrc .vimrc .tmux.conf .wezterm.lua"
   
   for file in $files; do
     create-symlink $file
   done
-
 }
 
 main $*
+
+#create-symlink ".wezterm.lua"
 
 exit 0
