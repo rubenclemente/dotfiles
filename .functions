@@ -13,12 +13,24 @@ function list-functions() {
     grep -E '^function\s+[a-zA-Z_-][a-zA-Z0-9_-]*\s*\(\)\s*{' "$SCRIPT_DIR/.functions" | grep -v -E '^function\s+_' | awk '{print ">> " $2}'
 }
 
+function pathsXX() {
+    echo $PATH | tr ':' '\n' | sed 's/^/\t/'
+}
+
+function paths() {
+    IFS=':' read -ra PATHS <<< "$PATH"
+    for p in "${PATHS[@]}"; do
+        ctxt yellow "\t $p"
+    done
+}
+
 function show-env() {
-    _info ">> GITHUB_USER = $GITHUB_USER"
-    _info ">> BASE_PATH   = $BASE_PATH"
-    _info ">> MVN_HOME    = $MVN_HOME"
-    _info ">> JAVA_HOME   = $JAVA_HOME"
-    _info ">> PATH        = $PATH"
+    ctxt yellow ">> GITHUB_USER = $GITHUB_USER"
+    ctxt yellow ">> BASE_PATH   = $BASE_PATH"
+    ctxt yellow ">> MVN_HOME    = $MVN_HOME"
+    ctxt yellow ">> JAVA_HOME   = $JAVA_HOME"
+    ctxt yellow ">> PATH = "
+    paths
 }
 
 function start() {
@@ -27,7 +39,7 @@ function start() {
 
 # Create a new directory and enter it
 function mkd() {
-    mkdir -p "$@" && cd "$_";
+    mkdir -p -- "$@" && cd -P -- "${@: -1}"
 }
 
 # Determine size of a file or total size of a directory
@@ -44,6 +56,10 @@ function fs() {
     fi;
 }
 
+function filesize() {
+    du -sk * | sort -n
+}
+
 # `tre` is a shorthand for `tree` with hidden files and color enabled, ignoring
 # the `.git` directory, listing directories first. The output gets piped into
 # `less` with options to preserve color and line numbers, unless the output is
@@ -52,7 +68,6 @@ function tre() {
     tree -aC -I '.git|node_modules|bower_components' --dirsfirst "$@" | less -FRNX;
 }
 
-
 #####################################################################
 # GIT functions
 #####################################################################
@@ -60,14 +75,14 @@ function tre() {
 function git-set-config() {
     git config --list
 
-    _msg_blue "Enter Git fullname:"
+    question "Enter Git fullname:"
     read USER_NAME
-    _info "Requesting root permissions to set git config at system level..."
+    info "Requesting root permissions to set git config at system level..."
     sudo git config --system user.name $USER_NAME
 
-    _msg_blue "Enter Git email address:"
+    question "Enter Git email address:"
     read USER_EMAIL
-    _info "Requesting root permissions to set git config at system level..."
+    info "Requesting root permissions to set git config at system level..."
     sudo git config --system user.email $USER_EMAIL
 
     git config --list
@@ -75,34 +90,35 @@ function git-set-config() {
 
 function git-init-repo() {
     if [[ -z "$1" ]]; then
-        _error "Repository name is empty."
+        error "Repository name is empty."
         return;
     fi;
 
-    _info "Github User is [$GITHUB_USER]"
-    _info "Repository name is [$1]"
-    _msg_blue "Press Enter to continue..."
+    warn "You need to create the remote repository first!"
+    info "Github User is [$GITHUB_USER]"
+    info "Repository name is [$1]"
+    question "Press Enter to continue..."
     read
 
-    _msg_yellow "git init -b main"
+    info "git init -b main"
     git init -b main
 
-    _msg_yellow "git add ."
+    info "git add ."
     git add .
 
-    _msg_yellow "git commit -m \"First commit\""
+    info "git commit -m \"First commit\""
     git commit -m "First commit"
 
-    _msg_yellow "git remote add origin git@github.com:$GITHUB_USER/$1.git"
+    info "git remote add origin git@github.com:$GITHUB_USER/$1.git"
     git remote add origin git@github.com:$GITHUB_USER/$1.git
 
-    _msg_yellow "git remote -v"
+    info "git remote -v"
     git remote -v
 
-    _msg_yellow "git push -u origin main"
+    info "git push -u origin main"
     git push -u origin main
 
-    _info "Success initiating git repo '$1'."
+    success "Success initiating git repo '$1'."
 }
 
 function gcom() {
@@ -116,25 +132,25 @@ function gcom() {
 #####################################################################
 
 function show-permissions() {
-    _msg_yellow "  N   Description                      ls   binary"
-    _msg_yellow "  0   No permissions at all            ---  000"
-    _msg_yellow "  1   Only execute                     --x  001"
-    _msg_yellow "  2   Only write                       -w-  010"
-    _msg_yellow "  3   Write and execute                -wx  011"
-    _msg_yellow "  4   Only read                        r--  100"
-    _msg_yellow "  5   Read and execute                 r-x  101"
-    _msg_yellow "  6   Read and write                   rw-  110"
-    _msg_yellow "  7   Read, write, and execute         rwx  111"
+    ctxt yellow "  N   Description                      ls   binary"
+    ctxt yellow "  0   No permissions at all            ---  000"
+    ctxt yellow "  1   Only execute                     --x  001"
+    ctxt yellow "  2   Only write                       -w-  010"
+    ctxt yellow "  3   Write and execute                -wx  011"
+    ctxt yellow "  4   Only read                        r--  100"
+    ctxt yellow "  5   Read and execute                 r-x  101"
+    ctxt yellow "  6   Read and write                   rw-  110"
+    ctxt yellow "  7   Read, write, and execute         rwx  111"
 }
 
 function set-permissions() {
 
     if [ -z "$1" ]; then
-        _msg_yellow "Usage: set-permissions <folder>"
-        _msg_yellow "Example:"
-        _msg_yellow "  set-permissions /path/to/folder  # Absolute path"
-        _msg_yellow "  set-permissions folder           # Relative path"
-        _msg_yellow "  set-permissions .                # Current folder"
+        ctxt yellow "Usage: set-permissions <folder>"
+        ctxt yellow "Example:"
+        ctxt yellow "  set-permissions /path/to/folder  # Absolute path"
+        ctxt yellow "  set-permissions folder           # Relative path"
+        ctxt yellow "  set-permissions .                # Current folder"
         return 1
     fi
 
@@ -162,9 +178,9 @@ function set-permissions() {
 
         popd > /dev/null || exit
 
-        _info "Permissions have been set for the folder: $folder"
+        success "Permissions have been set for the folder: $folder"
     else
-        _error "Folder does not exist: $folder"
+        error "Folder does not exist: $folder"
         return 1
     fi
 }
@@ -175,16 +191,16 @@ function set-permissions() {
 #####################################################################
 
 function create-desktop-entry() {
-    _msg_blue "Enter the name of the application (e.g., MyApp):"
+    question "Enter the name of the application (e.g., MyApp):"
     read -r app_name
 
-    _msg_blue "Enter the full path to the executable (e.g., /usr/bin/myapp or /opt/myapp/bin/start.sh):"
+    question "Enter the full path to the executable (e.g., /usr/bin/myapp or /opt/myapp/bin/start.sh):"
     read -r exec_path
 
-    _msg_blue "Enter the path for the application icon (e.g., /usr/share/icons/myapp.png or just 'myapp' if in icon theme):"
+    question "Enter the path for the application icon (e.g., /usr/share/icons/myapp.png or just 'myapp' if in icon theme):"
     read -r icon_path
 
-    #_msg_blue "Does the application run in a terminal? (true/false)"
+    #question "Does the application run in a terminal? (true/false)"
     #read -r terminal_option
     terminal_option=false
 
@@ -216,7 +232,7 @@ StartupNotify=true"
     # Make the .desktop file executable
     chmod +x "$desktop_file"
 
-    echo "Desktop entry for $app_name created at $desktop_file"
+    success "Desktop entry for $app_name created at $desktop_file"
 }
 
 function show-ports() {
@@ -224,62 +240,98 @@ function show-ports() {
 }
 
 # Simple function to convert Windows to Unix line endings
-2unix() {
+function 2unix() {
     for file in "$@"; do
         if [[ -f "$file" && -w "$file" ]]; then
             sed -i 's/\r$//' "$file" && echo "Fixed: $file"
         else
-            echo "Skipping: $file (not found or not writable)" >&2
+            warn "Skipping: $file (not found or not writable)"
         fi
     done
 }
 
+function trim() {
+    sed 's/^[ \t]*//;s/[ \t]*$//'
+}
+
+function rgrep() {
+    # -I: prevent searching in binary files
+    grep -Id recurse "$@"
+}
+
+function ucase() {
+    tr '[:lower:]' '[:upper:]'
+}
+
+function lcase() {
+    tr '[:upper:]' '[:lower:]'
+}
+
+function today() {
+    date '+%d-%m-%Y'
+}
 
 #####################################################################
 # Colors and messages
 #####################################################################
 
-# COLORS
-export r="\033[31m"       #RED
-export g="\033[32m"       #GREEN
-export y="\033[33m"       #YELLOW
-export b="\033[34m"       #BLUE
-export p="\033[35m"       #PURPLE
-export p="\033[36m"       #CYAN
-export p="\033[37m"       #WHITE
-export rb="\033[1;31m"    #REDBOLD
-export gb="\033[1;32m"    #GREENBOLD
-export yb="\033[1;33m"    #YELLOWBOLD
-export bb="\033[1;34m"    #BLUEBOLD
-export pb="\033[1;35m"    #PURPLEBOLD
-export n="\033[0m"        #NORMAL
+# Better color detection with more robust checks
+if command -v tput >/dev/null 2>&1; then
+    # Check if we're in an interactive terminal with color support
+    if [[ -t 1 ]] && [[ -n "${TERM:-}" ]] && tput colors >/dev/null 2>&1; then
+        RED=$(tput setaf 1)
+        GREEN=$(tput setaf 2)
+        YELLOW=$(tput setaf 3)
+        BLUE=$(tput setaf 4)
+        PURPLE=$(tput setaf 5)
+        CYAN=$(tput setaf 6)
+        WHITE=$(tput setaf 7)
+        BOLD=$(tput bold)
+        UNDERLINE=$(tput smul)
+        RESET=$(tput sgr0)
+    else
+        # Non-interactive or no color support
+        RED="" GREEN="" YELLOW="" BLUE="" PURPLE="" CYAN="" WHITE=""
+        BOLD="" UNDERLINE="" RESET=""
+    fi
+else
+    # No tput available
+    RED="" GREEN="" YELLOW="" BLUE="" PURPLE="" CYAN="" WHITE=""
+    BOLD="" UNDERLINE="" RESET=""
+fi
 
-function _info() {
-    echo -e "${g}[INFO] $1 ${n}" >&2
+# Export if you want them available in subshells
+#export RED GREEN YELLOW BLUE PURPLE CYAN WHITE BOLD RESET
+
+info()     { printf "${BLUE}[>] INFO: %s ${RESET}\n" "$*"; }
+warn()     { printf "${YELLOW}[!] WARN: %s ${RESET}\n" "$*" >&2; }
+error()    { printf "${RED}[✗] ERROR: %s ${RESET}\n" "$*" >&2; }
+success()  { printf "${GREEN}[✔] %s ${RESET}\n" "$*"; }
+question() { printf "${GREEN}[?] %s ${RESET}\n" "$*"; }
+
+ctxt() {
+    local color="$1"
+    shift
+    case "$color" in
+        red) echo -e "${RED}$*${RESET}" ;;
+        green) echo -e "${GREEN}$*${RESET}" ;;
+        yellow) echo -e "${YELLOW}$*${RESET}" ;;
+        blue) echo -e "${BLUE}$*${RESET}" ;;
+        purple) echo -e "${PURPLE}$*${RESET}" ;;
+        cyan) echo -e "${CYAN}$*${RESET}" ;;
+        white) echo -e "${WHITE}$*${RESET}" ;;
+        bold) echo -e "${BOLD}$*${RESET}" ;;
+        underline) echo -e "${UNDERLINE}$*${RESET}" ;;
+        *) echo "$*" ;;  # No color
+    esac
 }
 
-function _warn() {
-    echo -e "${y}[WARN] $1 ${n}" >&2
-}
-
-function _error() {
-    echo -e "${r}[ERROR] $1 ${n}" >&2
-}
-
-function _msg_green() {
-    echo -e "${g}$1 ${n}" >&2
-}
-
-function _msg_yellow() {
-    echo -e "${y}$1 ${n}" >&2
-}
-
-function _msg_red() {
-    echo -e "${r}$1 ${n}" >&2
-}
-
-function _msg_blue() {
-    echo -e "${b}$1 ${n}" >&2
+test-colors() {
+    info "Info message."
+    warn "Warn message."
+    error "Error message."
+    success "Success message."
+    question "Question..."
 }
 
 #####################################################################
