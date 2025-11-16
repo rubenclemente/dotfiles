@@ -13,61 +13,6 @@ function list-functions() {
     grep -E '^function\s+[a-zA-Z_-][a-zA-Z0-9_-]*\s*\(\)\s*{' "$SCRIPT_DIR/.functions" | grep -v -E '^function\s+_' | awk '{print ">> " $2}'
 }
 
-function pathsXX() {
-    echo $PATH | tr ':' '\n' | sed 's/^/\t/'
-}
-
-function paths() {
-    IFS=':' read -ra PATHS <<< "$PATH"
-    for p in "${PATHS[@]}"; do
-        ctxt yellow "\t $p"
-    done
-}
-
-function show-env() {
-    ctxt yellow ">> GITHUB_USER = $GITHUB_USER"
-    ctxt yellow ">> BASE_PATH   = $BASE_PATH"
-    ctxt yellow ">> MVN_HOME    = $MVN_HOME"
-    ctxt yellow ">> JAVA_HOME   = $JAVA_HOME"
-    ctxt yellow ">> PATH = "
-    paths
-}
-
-function start() {
-    nohup $1 &> /dev/null & disown;
-}
-
-# Create a new directory and enter it
-function mkd() {
-    mkdir -p -- "$@" && cd -P -- "${@: -1}"
-}
-
-# Determine size of a file or total size of a directory
-function fs() {
-    if du -b /dev/null > /dev/null 2>&1; then
-        local arg=-sbh;
-    else
-        local arg=-sh;
-    fi
-    if [[ -n "$@" ]]; then
-        du $arg -- "$@";
-    else
-        du $arg .[^.]* ./*;
-    fi;
-}
-
-function filesize() {
-    du -sk * | sort -n
-}
-
-# `tre` is a shorthand for `tree` with hidden files and color enabled, ignoring
-# the `.git` directory, listing directories first. The output gets piped into
-# `less` with options to preserve color and line numbers, unless the output is
-# small enough for one screen.
-function tre() {
-    tree -aC -I '.git|node_modules|bower_components' --dirsfirst "$@" | less -FRNX;
-}
-
 #####################################################################
 # GIT functions
 #####################################################################
@@ -121,11 +66,31 @@ function git-init-repo() {
     success "Success initiating git repo '$1'."
 }
 
-function gcom() {
-    git add .
-    git commit -m "$1"
+# quick-commit
+# qc Update notes
+function qc() {
+    local current_branch=$(git branch --show-current 2>/dev/null)
+    local commit_message="${*:-Update notes}"  # Join all arguments
+    
+    if [[ -z "$current_branch" ]]; then
+        echo "❌ Not a git repository!"
+        return 1
+    fi
+    
+    echo "=== Git Status (branch: $current_branch) ==="
+    git status --short
+    
+    read -p "Commit ($commit_message) and push to '$current_branch'? [y/N] " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        git add .
+        git commit -m "$commit_message"
+        git push -u origin "$current_branch"
+        echo "✅ Changes committed and pushed to $current_branch!"
+    else
+        echo "❌ Operation cancelled."
+    fi
 }
-
 
 #####################################################################
 # Permissions
@@ -185,10 +150,42 @@ function set-permissions() {
     fi
 }
 
-
 #####################################################################
 # Utilities
 #####################################################################
+
+function start() {
+    nohup $1 &> /dev/null & disown;
+}
+
+# Create a new directory and enter it
+function mkd() {
+    mkdir -p -- "$@" && cd -P -- "${@: -1}"
+}
+
+# Determine size of a file or total size of a directory
+function fs() {
+    if du -b /dev/null > /dev/null 2>&1; then
+        local arg=-sbh;
+    else
+        local arg=-sh;
+    fi
+    if [[ -n "$@" ]]; then
+        du $arg -- "$@";
+    else
+        du $arg .[^.]* ./*;
+    fi;
+}
+
+function filesize() {
+    du -sk * | sort -n
+}
+
+# Shorthand for `tree` with hidden files and color enabled, ignoring directories like `.git`, listing directories first.
+# The output gets piped into `less` with options to preserve color and line numbers, unless is small enough for one screen.
+function tre() {
+    tree -aC -I '.git|node_modules|bower_components|__pycache__' --dirsfirst "$@" | less -FRNX;
+}
 
 function create-desktop-entry() {
     question "Enter the name of the application (e.g., MyApp):"
@@ -235,10 +232,6 @@ StartupNotify=true"
     success "Desktop entry for $app_name created at $desktop_file"
 }
 
-function show-ports() {
-    sudo ss -tulpn | grep LISTEN
-}
-
 # Simple function to convert Windows to Unix line endings
 function 2unix() {
     for file in "$@"; do
@@ -269,6 +262,30 @@ function lcase() {
 
 function today() {
     date '+%d-%m-%Y'
+}
+
+#####################################################################
+# Info
+#####################################################################
+
+function paths() {
+    IFS=':' read -ra PATHS <<< "$PATH"
+    for p in "${PATHS[@]}"; do
+        ctxt yellow "\t $p"
+    done
+}
+
+function show-env() {
+    ctxt yellow ">> GITHUB_USER = $GITHUB_USER"
+    ctxt yellow ">> BASE_PATH   = $BASE_PATH"
+    ctxt yellow ">> MVN_HOME    = $MVN_HOME"
+    ctxt yellow ">> JAVA_HOME   = $JAVA_HOME"
+    ctxt yellow ">> PATH = "
+    paths
+}
+
+function show-ports() {
+    sudo ss -tulpn | grep LISTEN
 }
 
 #####################################################################
@@ -332,6 +349,11 @@ test-colors() {
     error "Error message."
     success "Success message."
     question "Question..."
+
+    local colors=("red" "green" "yellow" "blue" "purple" "cyan" "white" "bold" "underline")    
+    for color in "${colors[@]}"; do
+        ctxt "$color" "--> CTXT color message."
+    done
 }
 
 #####################################################################
